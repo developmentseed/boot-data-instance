@@ -8,6 +8,10 @@ set -euo pipefail
 echo "CLUSTER_NAME: ${CLUSTER_NAME}"
 echo "ECR_REPOSITORY: ${ECR_REPOSITORY}"
 echo "TASK_DEFINITION: ${TASK_DEFINITION}"
+echo "ACCOUNT_ID: ${ACCOUNT_ID}"
+echo
+echo
+echo
 
 _args=""
 

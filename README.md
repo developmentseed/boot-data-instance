@@ -11,7 +11,7 @@ Similar project: https://github.com/developmentseed/aws-batch-example
 
 **Prerequisites**
 
-Export all requuire parameters and obtain your AWS Account ID
+Export all required parameters and obtain your AWS Account ID
 
 ```sh
 export CLUSTER_NAME=ffda-poi-supertiles
@@ -66,7 +66,7 @@ export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 ## Step 2: Create a Cluster in ECS and Register a Task Definition
 
 ```bash
-./cluster_td.sh
+    ./cluster.sh
 ```
 
 
@@ -91,8 +91,7 @@ export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
 
 ```bash
-    aws ecs  delete-cluster --cluster $CLUSTER_NAME
     aws ecs deregister-task-definition --task-definition $TASK_DEFINITION:1
     aws logs delete-log-group --log-group-name /ecs/$TASK_DEFINITION
-
+    aws ecs  delete-cluster --cluster $CLUSTER_NAME
 ```

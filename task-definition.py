@@ -3,16 +3,19 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--task_definition")
 parser.add_argument("--ecr_repository")
+parser.add_argument("--account_id")
+
 args = parser.parse_args()
 task_definition = args.task_definition
 ecr_repository = args.ecr_repository
+account_id = args.account_id
 
 task_definition_config = {
     "family": task_definition,
-    "executionRoleArn": "arn:aws:iam::552819999234:role/ecsTaskExecutionRole",
+    "executionRoleArn": f"arn:aws:iam::{account_id}:role/ecsTaskExecutionRole",
     "containerDefinitions": [{
         "name": task_definition,
-        "image": f"552819999234.dkr.ecr.us-east-1.amazonaws.com/{ecr_repository}:v1",
+        "image": f"{account_id}.dkr.ecr.us-east-1.amazonaws.com/{ecr_repository}:v1",
         "environment": [{
                         "name": "TEST",
                         "value": "test"
@@ -29,7 +32,7 @@ task_definition_config = {
     }],
     "memory": "8192",
     "cpu": "4096",
-    "taskRoleArn": "arn:aws:iam::552819999234:role/ecsS3FullAccess",
+    "taskRoleArn": f"arn:aws:iam::{account_id}:role/ecsS3FullAccess",
     "requiresCompatibilities": [
         "FARGATE"
     ],
