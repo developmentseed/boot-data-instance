@@ -70,7 +70,7 @@ export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 ```
 
 
-# Step 4: Execute task 
+## Step 3: Execute task
 
 ```sh
 ./run_task.sh  \
@@ -87,7 +87,7 @@ export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 
 
 
-# Step 5: Delete all resources 
+## Step 4: Delete all resources
 
 
 ```bash
