@@ -7,14 +7,35 @@ Parameters:
   Project:
     Description: "Project tag to tag the resources"
     Type: String
+  Client:
+    Description: "Client that we are build the project for"
+    Type: String
+  Owner:
+    Description: "Owner of the stack"
+    Type: String
   DockerImage:
     Description: "ECR ID for docker image"
     Type: String
+  TaskDefinitionCpu:
+    Description: "CPU for container"
+    Type: Number
+    Default: 256
+  TaskDefinitionMemory:
+    Description: "Memory for container"
+    Type: Number
+    Default: 512
 Resources:
   Cluster:
     Type: AWS::ECS::Cluster
     Properties:
       ClusterName: !Ref ClusterName
+      Tags: 
+        - Key: "Project"
+          Value: !Ref Project
+        - Key: "Client"
+          Value: !Ref Client
+        - Key: "Owner"
+          Value: !Ref Owner
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -54,6 +75,9 @@ Resources:
               - s3:GetObjectVersion
               - s3:ListBucketVersions
               - s3:ListBucket
+              - s3:PutObject
+              - s3:PutObjectAcl
+              - s3:DeleteObject
             Resource:
               - arn:aws:s3:::*
   # define task definition
@@ -61,8 +85,8 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: !Join [ "-", [ !Ref ClusterName, "task-definition" ] ]
-      Cpu: 256
-      Memory: 512
+      Cpu: !Ref TaskDefinitionCpu
+      Memory: !Ref TaskDefinitionMemory
       NetworkMode: awsvpc
       ExecutionRoleArn: !Ref ExecutionRole
       ContainerDefinitions:
@@ -80,4 +104,8 @@ Resources:
       Tags: 
         - Key: "Project"
           Value: !Ref Project
+        - Key: "Client"
+          Value: !Ref Client
+        - Key: "Owner"
+          Value: !Ref Owner
       TaskRoleArn: !Ref TaskRole
