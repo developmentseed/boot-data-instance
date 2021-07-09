@@ -68,10 +68,26 @@ export DOCKER_IMAGE=${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPOSITO
 
 ## Step 2: Create stack
 
+
 ```bash
-    ./cloudformation.sh
+    ./stack.sh <CPU> <MEMORY>
 ```
 
+Some examples of values: https://docs.amazonaws.cn/en_us/AmazonECS/latest/APIReference/API_TaskDefinition.html
+
+```
+256 (.25 vCPU) - Available memory values: 512 (0.5 GB), 1024 (1 GB), 2048 (2 GB)
+512 (.5 vCPU) - Available memory values: 1024 (1 GB), 2048 (2 GB), 3072 (3 GB), 4096 (4 GB)
+1024 (1 vCPU) - Available memory values: 2048 (2 GB), 3072 (3 GB), 4096 (4 GB), 5120 (5 GB), 6144 (6 GB), 7168 (7 GB), 8192 (8 GB)
+2048 (2 vCPU) - Available memory values: Between 4096 (4 GB) and 16384 (16 GB) in increments of 1024 (1 GB)
+4096 (4 vCPU) - Available memory values: Between 8192 (8 GB) and 30720 (30 GB) in increments of 1024 (1 GB)
+```
+
+E.g
+
+```bash
+    ./stack.sh 256 512
+```
 
 ## Step 3: Execute task
 
@@ -81,7 +97,7 @@ export DOCKER_IMAGE=${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPOSITO
         --geojson_file=s3://ds-data-projects/data_test/schools.geojson \
         --zoom=18 \
         --url_map_service="https://tile.openstreetmap.org/{z}/{x}/{y}.png" \
-        --url_map_service_type="tms" \
+        --url_map_service_type=tms \
         --tiles_folder=s3://ds-data-projects/data_test/tiles \
         --st_tiles_folder=s3://ds-data-projects/data_test/super_tiles \
         --geojson_output=s3://ds-data-projects/data_test/schools_training.geojson \

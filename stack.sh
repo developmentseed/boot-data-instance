@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 CLUSTER_NAME=${STACK_NAME}
+CPU=$1
+MEMORY=$2
 
 aws cloudformation create-stack \
     --stack-name ${STACK_NAME} \
@@ -11,7 +13,9 @@ aws cloudformation create-stack \
         ParameterKey=Project,ParameterValue=${PROJECT} \
         ParameterKey=Client,ParameterValue=${CLIENT} \
         ParameterKey=Owner,ParameterValue=${OWNER} \
-        ParameterKey=DockerImage,ParameterValue=${DOCKER_IMAGE}
+        ParameterKey=DockerImage,ParameterValue=${DOCKER_IMAGE} \
+        ParameterKey=TaskDefinitionCpu,ParameterValue=${CPU} \
+        ParameterKey=TaskDefinitionMemory,ParameterValue=${MEMORY}
 
 echo
 echo

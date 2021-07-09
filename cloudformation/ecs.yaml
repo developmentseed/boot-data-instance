@@ -16,6 +16,14 @@ Parameters:
   DockerImage:
     Description: "ECR ID for docker image"
     Type: String
+  TaskDefinitionCpu:
+    Description: "CPU for container"
+    Type: Number
+    Default: 256
+  TaskDefinitionMemory:
+    Description: "Memory for container"
+    Type: Number
+    Default: 512
 Resources:
   Cluster:
     Type: AWS::ECS::Cluster
@@ -77,8 +85,8 @@ Resources:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: !Join [ "-", [ !Ref ClusterName, "task-definition" ] ]
-      Cpu: 256
-      Memory: 512
+      Cpu: !Ref TaskDefinitionCpu
+      Memory: !Ref TaskDefinitionMemory
       NetworkMode: awsvpc
       ExecutionRoleArn: !Ref ExecutionRole
       ContainerDefinitions:
