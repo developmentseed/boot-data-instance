@@ -5,10 +5,14 @@
 
 set -euo pipefail
 
+TASK_DEFINITION=${CLUSTER_NAME}-task-definition
+LOG_GROUP=${CLUSTER_NAME}-log-group
+CONTAINER_DEFINITIONS=${CLUSTER_NAME}-container
+
 echo "CLUSTER_NAME: ${CLUSTER_NAME}"
-echo "ECR_REPOSITORY: ${ECR_REPOSITORY}"
 echo "TASK_DEFINITION: ${TASK_DEFINITION}"
-echo "ACCOUNT_ID: ${ACCOUNT_ID}"
+echo "LOG_GROUP: ${LOG_GROUP}"
+echo "CONTAINER_DEFINITIONS: ${CONTAINER_DEFINITIONS}"
 echo
 echo
 echo
@@ -30,12 +34,13 @@ _subnet_id=$(
     --query "Subnets[0].SubnetId"
 )
 
+echo $_subnet_id
 aws ecs run-task \
   --cluster ${CLUSTER_NAME} \
   --count 1 \
   --launch-type FARGATE \
   --network-configuration "awsvpcConfiguration={subnets=[${_subnet_id}],assignPublicIp=ENABLED}" \
-  --overrides "containerOverrides=[{name=${TASK_DEFINITION},command=[${_command}]}]" \
+  --overrides "containerOverrides=[{name=${CONTAINER_DEFINITIONS},command=[${_command}]}]" \
   --task-definition ${TASK_DEFINITION}
 
 echo
@@ -43,8 +48,11 @@ echo "To see the most recent 50 log messages from the past 5 minutes,"
 echo "run the following command:"
 echo
 echo "    aws logs filter-log-events \
-        --log-group-name /ecs/${TASK_DEFINITION} \
+        --log-group-name ${LOG_GROUP} \
         --query events[].message \
         --start-time $(($(date +%s) * 1000 - 300000)) \
         --output text | tr \t \n | tail -n 50"
 echo
+
+
+

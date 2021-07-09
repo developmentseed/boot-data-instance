@@ -11,13 +11,16 @@ Similar project: https://github.com/developmentseed/aws-batch-example
 
 **Prerequisites**
 
-Export all required parameters and obtain your AWS Account ID
+Export all required parameters and obtain the AWS Account ID
 
 ```sh
-export CLUSTER_NAME=ffda-poi-supertiles
+export PROJECT=ffda-poi
+export STACK_NAME=ffda-poi-supertiles
+
 export ECR_REPOSITORY=ffda-poi/supertiles
-export TASK_DEFINITION=task-supertiles
 export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+
+export DOCKER_IMAGE=${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPOSITORY}:v1
 ```
 
 
@@ -33,7 +36,7 @@ export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
 - Creates a repository inside the specified namespace in the default registry for an account.
 
 ```bash
-    aws ecr create-repository --repository-name $ECR_REPOSITORY
+    aws ecr create-repository --repository-name ${ECR_REPOSITORY}
     aws ecr describe-repositories
 ```
 
@@ -44,9 +47,7 @@ export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
     e.g: from :https://github.com/developmentseed/poi/blob/main/docker-compose.yaml#L4
 
 ```bash
-    docker tag \
-        ffda/poi_data:v1 \
-        ${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:v1
+    docker tag ffda/poi_data:v1 ${DOCKER_IMAGE}
 ```
 
 - login to ECR and push the image to ECR
@@ -58,15 +59,14 @@ export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
         --username AWS \
         --password-stdin ${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com
 
-    docker push \
-        ${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/$ECR_REPOSITORY:v1
+    docker push ${DOCKER_IMAGE}
 ```
 
 
-## Step 2: Create a Cluster in ECS and Register a Task Definition
+## Step 2: Create stack
 
 ```bash
-    ./cluster.sh
+    ./cloudformation.sh
 ```
 
 
@@ -85,13 +85,9 @@ export ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
         --geojson_output_coverage=s3://ffda-poi/training_data/mauritania_test/mauritania_training_supertile_coverage.geojson
 ```
 
-
-
-## Step 4: Delete all resources
+## Step 4: Delete stack
 
 
 ```bash
-    aws ecs deregister-task-definition --task-definition $TASK_DEFINITION:1
-    aws logs delete-log-group --log-group-name /ecs/$TASK_DEFINITION
-    aws ecs  delete-cluster --cluster $CLUSTER_NAME
+    aws cloudformation delete-stack --stack-name ${STACK_NAME}
 ```

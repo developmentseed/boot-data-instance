@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: A CloudFormation template for Fargate
+Parameters:
+  ClusterName:
+    Description: "Cluster name"
+    Type: String
+  Project:
+    Description: "Project tag to tag the resources"
+    Type: String
+  DockerImage:
+    Description: "ECR ID for docker image"
+    Type: String
+Resources:
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Ref ClusterName
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Join [ "-", [ !Ref ClusterName, "log-group" ] ]
+  # executionRoleArn - Provides access to the task to start container, pulling images from ECR, writing logs to Cloudwatch.
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join [ "-", [ !Ref ClusterName, "execution-role" ] ]
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+  # taskRoleArn - Allows the container to make calls AWS resources - s3, DB
+  TaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Join ['-', [!Ref ClusterName, "task-role"]]
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Path: "/"
+      Policies:
+      - PolicyName: !Join ['-', [!Ref ClusterName, "task-s3-police"]]
+        PolicyDocument:
+          Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:GetObjectVersion
+              - s3:ListBucketVersions
+              - s3:ListBucket
+            Resource:
+              - arn:aws:s3:::*
+  # define task definition
+  TaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Join [ "-", [ !Ref ClusterName, "task-definition" ] ]
+      Cpu: 256
+      Memory: 512
+      NetworkMode: awsvpc
+      ExecutionRoleArn: !Ref ExecutionRole
+      ContainerDefinitions:
+        - Name: !Join [ "-", [ !Ref ClusterName, "container" ] ]
+          Image: !Ref DockerImage
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-region: !Ref AWS::Region
+              awslogs-group: !Ref LogGroup
+              awslogs-stream-prefix: ecs
+      RequiresCompatibilities:
+        - EC2
+        - FARGATE
+      Tags: 
+        - Key: "Project"
+          Value: !Ref Project
+      TaskRoleArn: !Ref TaskRole
