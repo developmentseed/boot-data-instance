@@ -5,6 +5,7 @@
 
 set -euo pipefail
 
+CLUSTER_NAME=${STACK_NAME}
 TASK_DEFINITION=${CLUSTER_NAME}-task-definition
 LOG_GROUP=${CLUSTER_NAME}-log-group
 CONTAINER_DEFINITIONS=${CLUSTER_NAME}-container
@@ -34,7 +35,6 @@ _subnet_id=$(
     --query "Subnets[0].SubnetId"
 )
 
-echo $_subnet_id
 aws ecs run-task \
   --cluster ${CLUSTER_NAME} \
   --count 1 \
@@ -47,11 +47,7 @@ echo
 echo "To see the most recent 50 log messages from the past 5 minutes,"
 echo "run the following command:"
 echo
-echo "    aws logs filter-log-events \
-        --log-group-name ${LOG_GROUP} \
-        --query events[].message \
-        --start-time $(($(date +%s) * 1000 - 300000)) \
-        --output text | tr \t \n | tail -n 50"
+echo "aws logs filter-log-events --log-group-name ${LOG_GROUP} --query events[].message --start-time $(($(date +%s) * 1000 - 300000)) --output text | tr \t \n | tail -n 50"
 echo
 
 

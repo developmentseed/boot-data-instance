@@ -15,6 +15,9 @@ Export all required parameters and obtain the AWS Account ID
 
 ```sh
 export PROJECT=ffda-poi
+export CLIENT=ffda
+export OWNER=Rub21
+
 export STACK_NAME=ffda-poi-supertiles
 
 export ECR_REPOSITORY=ffda-poi/supertiles
@@ -75,14 +78,14 @@ export DOCKER_IMAGE=${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPOSITO
 ```sh
 ./run_task.sh  \
     super_tiles \
-        --geojson_file=s3://ds-data-projects/FFDA/phase3/training_data/mauritania_training_data.geojson \
+        --geojson_file=s3://ds-data-projects/data_test/schools.geojson \
         --zoom=18 \
-        --url_map_service=https://tile.openstreetmap.org/{z}/{x}/{y}.png \
-        --url_map_service_type=tms \
-        --tiles_folder=data/tiles \
-        --st_tiles_folder=s3://ffda-poi/training_data/mauritania_test/supertiles/ \
-        --geojson_output=s3://ffda-poi/training_data/mauritania_test/mauritania_training_data.geojson \
-        --geojson_output_coverage=s3://ffda-poi/training_data/mauritania_test/mauritania_training_supertile_coverage.geojson
+        --url_map_service="https://tile.openstreetmap.org/{z}/{x}/{y}.png" \
+        --url_map_service_type="tms" \
+        --tiles_folder=s3://ds-data-projects/data_test/tiles \
+        --st_tiles_folder=s3://ds-data-projects/data_test/super_tiles \
+        --geojson_output=s3://ds-data-projects/data_test/schools_training.geojson \
+        --geojson_output_coverage=s3://ds-data-projects/schools_training_coverage.geojson
 ```
 
 ## Step 4: Delete stack

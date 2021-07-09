@@ -7,6 +7,12 @@ Parameters:
   Project:
     Description: "Project tag to tag the resources"
     Type: String
+  Client:
+    Description: "Client that we are build the project for"
+    Type: String
+  Owner:
+    Description: "Owner of the stack"
+    Type: String
   DockerImage:
     Description: "ECR ID for docker image"
     Type: String
@@ -15,6 +21,13 @@ Resources:
     Type: AWS::ECS::Cluster
     Properties:
       ClusterName: !Ref ClusterName
+      Tags: 
+        - Key: "Project"
+          Value: !Ref Project
+        - Key: "Client"
+          Value: !Ref Client
+        - Key: "Owner"
+          Value: !Ref Owner
   LogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -54,6 +67,9 @@ Resources:
               - s3:GetObjectVersion
               - s3:ListBucketVersions
               - s3:ListBucket
+              - s3:PutObject
+              - s3:PutObjectAcl
+              - s3:DeleteObject
             Resource:
               - arn:aws:s3:::*
   # define task definition
@@ -80,4 +96,8 @@ Resources:
       Tags: 
         - Key: "Project"
           Value: !Ref Project
+        - Key: "Client"
+          Value: !Ref Client
+        - Key: "Owner"
+          Value: !Ref Owner
       TaskRoleArn: !Ref TaskRole
