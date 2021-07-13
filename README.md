@@ -106,6 +106,8 @@ Get ssh CLI  to access into the instance
 
 ```sh
 aws cloudformation describe-stacks --stack-name bri-infra-data-proces | jq .Stacks[0].Outputs[0].OutputValue
+
+sudo cat /root/.ssh/id_rsa.pub
 ```
 
 ## Step 3: Execute task
