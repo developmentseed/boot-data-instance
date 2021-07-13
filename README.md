@@ -68,6 +68,7 @@ export DOCKER_IMAGE=${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPOSITO
 
 ## Step 2: Create stack
 
+- Cluster + Fargate
 
 ```bash
     ./stack.sh <CPU> <MEMORY>
@@ -89,6 +90,26 @@ E.g
     ./stack.sh 256 512
 ```
 
+- EC2
+
+In case you wan to spin up a EC2 instance with docker , aws cli installed.
+
+```bash
+    export KEYNAME="hp-paraguay"
+    export INSTANCETYPE="t2.micro"
+    ./ec2_stack.sh $KEYNAME $INSTANCETYPE
+```
+Instance types at: https://aws.amazon.com/ec2/instance-types/
+
+
+Get ssh CLI  to access into the instance
+
+```sh
+aws cloudformation describe-stacks --stack-name bri-infra-data-proces | jq .Stacks[0].Outputs[0].OutputValue
+
+sudo cat /root/.ssh/id_rsa.pub
+```
+
 ## Step 3: Execute task
 
 ```sh
@@ -103,6 +124,10 @@ E.g
         --geojson_output=s3://ds-data-projects/data_test/schools_training.geojson \
         --geojson_output_coverage=s3://ds-data-projects/schools_training_coverage.geojson
 ```
+
+
+
+## Step 2: Create stack for Fargate
 
 ## Step 4: Delete stack
 

@@ -1,0 +1,105 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: A CloudFormation template for EC2
+Parameters:
+  Name:
+    Description: 'Stack name'
+    Type: String
+  Project:
+    Description: 'Project tag to tag the resources'
+    Type: String
+  Client:
+    Description: 'Client that we are build the project for'
+    Type: String
+  Owner:
+    Description: 'Owner of the stack'
+    Type: String
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access into the server
+    Type: String
+  InstanceType:
+    Description: Size type of the instance
+    Type: String
+Mappings:
+  RegionMap:
+    us-east-1:
+      AMI: ami-09e67e426f25ce0d7
+    us-west-1:
+      AMI: ami-0d382e80be7ffdae5
+    eu-west-1:
+      AMI: ami-0a8e758f5e873d1c1
+Resources:
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      IamInstanceProfile: general-worker
+      ImageId:
+        Fn::FindInMap:
+          - RegionMap
+          - !Ref AWS::Region
+          - AMI
+      SecurityGroupIds:
+        - !Ref SecurityGroup
+      Tags:
+        - Key: Name
+          Value: !Ref Name
+        - Key: 'Project'
+          Value: !Ref Project
+        - Key: 'Client'
+          Value: !Ref Client
+        - Key: 'Owner'
+          Value: !Ref Owner
+      KeyName: !Ref KeyName
+      UserData:
+        'Fn::Base64': !Sub |
+          #!/bin/bash
+          apt-get -y upgrade
+          apt-get update
+          apt-get -y install \
+          apt-transport-https \
+          ca-certificates \
+          curl \
+          software-properties-common \
+          build-essential \
+          gnupg \
+          lsb-release \
+          git \
+          python3-pip \
+          libssl-dev \
+          libffi-dev \
+          python3-dev \
+          awscli
+
+          #Install docker
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+          add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+          apt-get update
+          apt-get -y install docker-ce
+          usermod -aG docker $USER
+          docker info
+          apt-get -y install docker-compose
+
+          # Generate ssh key
+          ssh-keygen -b 2048 -t rsa -f /root/.ssh/id_rsa -q -N ""
+          cat /root/.ssh/id_rsa.pub
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open Ports 22
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+Outputs:
+  Access:
+    Description: Access to EC2
+    Value:
+      !Join [
+        ' ',
+        [
+          'ssh -i ',
+          !Join ['', [!Ref KeyName, '.pem']],
+          !Join ['', ['ubuntu@', !Sub '${EC2Instance.PublicDnsName}']],
+        ],
+      ]
