@@ -16,7 +16,7 @@ Export all required parameters and obtain the AWS Account ID
 ```sh
 export PROJECT=ffda-poi
 export CLIENT=ffda
-export OWNER=Rub21
+export OWNER=username
 
 export STACK_NAME=ffda-poi-supertiles
 
@@ -90,30 +90,18 @@ E.g
     ./stack.sh 256 512
 ```
 
-- EC2
+*note*: in case we need a ec2 stack follow 👉 [EC2_stack.md](EC2_stack.md)
 
-In case you wan to spin up a EC2 instance with docker , aws cli installed.
+## Step 3: Execute fargate task
 
-```bash
-    export KEYNAME="hp-paraguay"
-    export INSTANCETYPE="t2.micro"
-    ./ec2_stack.sh $KEYNAME $INSTANCETYPE
-```
-Instance types at: https://aws.amazon.com/ec2/instance-types/
+- Install script in order to use everywhere on the system.
 
 
-Get ssh CLI  to access into the instance
+`sudo cp run_task.sh /usr/local/bin/run_task` or `sudo cp run_task.sh /usr/bin/run_task`
+
 
 ```sh
-aws cloudformation describe-stacks --stack-name bri-infra-data-proces | jq .Stacks[0].Outputs[0].OutputValue
-
-sudo cat /root/.ssh/id_rsa.pub
-```
-
-## Step 3: Execute task
-
-```sh
-./run_task.sh  \
+run_task  \
     super_tiles \
         --geojson_file=s3://ds-data-projects/data_test/schools.geojson \
         --zoom=18 \
@@ -125,9 +113,6 @@ sudo cat /root/.ssh/id_rsa.pub
         --geojson_output_coverage=s3://ds-data-projects/schools_training_coverage.geojson
 ```
 
-
-
-## Step 2: Create stack for Fargate
 
 ## Step 4: Delete stack
 
