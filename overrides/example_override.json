@@ -1,0 +1,16 @@
+{
+    "containerOverrides": [
+        {
+            "name": "...",
+            "environment": [
+                {
+                    "name": "MAPILLARY_ACCESS_TOKEN",
+                    "value": "..."
+                }
+            ],
+            "command": [
+                "./clip_pano.sh"
+            ]
+        }
+    ]
+}

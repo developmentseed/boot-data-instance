@@ -4,6 +4,7 @@ CLUSTER_NAME=${STACK_NAME}
 CPU=$1
 MEMORY=$2
 
+echo "Creating $CLUSTER_NAME / CPU: $CPU , MEMORY: $MEMORY " 
 aws cloudformation create-stack \
     --stack-name ${STACK_NAME} \
     --template-body file://cloudformation/ecs.yaml \

@@ -40,7 +40,7 @@ export DOCKER_IMAGE=${ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${ECR_REPOSITO
 
 ```bash
     aws ecr create-repository --repository-name ${ECR_REPOSITORY}
-    aws ecr describe-repositories
+    aws ecr describe-repositories | jq .repositories[].repositoryName
 ```
 
 
