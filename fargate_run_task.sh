@@ -15,12 +15,9 @@ echo "TASK_DEFINITION: ${TASK_DEFINITION}"
 echo "LOG_GROUP: ${LOG_GROUP}"
 echo "CONTAINER_DEFINITIONS: ${CONTAINER_DEFINITIONS}"
 echo
-echo
-echo
 
 _args=""
 
-# Convert script arguments into a comma-separated list of arguments to pass to the
 # ECS task container override command.
 for _arg in $@; do
   _args=${_args:+${_args},}\"${_arg}\"
@@ -30,25 +27,40 @@ _command="${_args}"
 
 _subnet_id=$(
   aws ec2 describe-subnets \
-    --filters Name=tag:Name,Values=write-tfrecords/Public \
     --output text \
     --query "Subnets[0].SubnetId"
 )
+
+######################### 
+# For running comand line
+#########################
+
+# aws ecs run-task \
+#   --cluster ${CLUSTER_NAME} \
+#   --count 1 \
+#   --launch-type FARGATE \
+#   --network-configuration "awsvpcConfiguration={subnets=[${_subnet_id}],assignPublicIp=ENABLED}" \
+#   --overrides "containerOverrides=[{name=${CONTAINER_DEFINITIONS},command=[${_command}]}]" \
+#   --task-definition ${TASK_DEFINITION}
+
+
+######################### 
+# For running mor complex comand lines
+# Make a copy of example_override.json and edit the file
+#########################
+overrideFile=overrides/cpal.json
+
+sed -i -e 's/"name": "..."/"name": "'$CONTAINER_DEFINITIONS'"/g' $overrideFile
 
 aws ecs run-task \
   --cluster ${CLUSTER_NAME} \
   --count 1 \
   --launch-type FARGATE \
   --network-configuration "awsvpcConfiguration={subnets=[${_subnet_id}],assignPublicIp=ENABLED}" \
-  --overrides "containerOverrides=[{name=${CONTAINER_DEFINITIONS},command=[${_command}]}]" \
-  --task-definition ${TASK_DEFINITION}
+  --overrides file://$overrideFile \
+  --task-definition ${TASK_DEFINITION} | jq .
 
-echo
-echo "To see the most recent 50 log messages from the past 5 minutes,"
-echo "run the following command:"
 echo
 echo "aws logs filter-log-events --log-group-name ${LOG_GROUP} --query events[].message --start-time $(($(date +%s) * 1000 - 300000)) --output text | tr \t \n | tail -n 50"
 echo
-
-
-
+echo
